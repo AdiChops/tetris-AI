@@ -324,7 +324,6 @@ Press space to continue""" % self.score)
                             key_actions[key]()
 
             dont_burn_my_cpu.tick(maxfps)
-
 if __name__ == '__main__':
     App = TetrisApp()
     App.run()
