@@ -37,6 +37,9 @@ def test(app=TetrisApp):
     while not app.gameover:
         app.insta_drop()
         time.sleep(0.5)
+        for i in app.board:
+            print(i)
+        print('\n')
     print("Game is over!")
     time.sleep(1) # sleep for 1 second to process what happened and then quit
     pygame.event.post(pygame.event.Event(pygame.QUIT))
