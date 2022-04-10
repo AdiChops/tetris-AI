@@ -5,11 +5,11 @@ import time
 from tetris import TetrisApp
 import os
 
-def clearConsole():
-    command = 'clear'
-    if os.name in ('nt','dos'):
-        command = 'cls'
-    os.system(command)
+# def clearConsole():
+#     command = 'clear'
+#     if os.name in ('nt','dos'):
+#         command = 'cls'
+#     os.system(command)
 
 # tetris_shapes = [
 #     [[1, 1, 1],
@@ -65,18 +65,19 @@ def project(app=TetrisApp):
 
 # Heuristic used for A* search
 def heuristic(board: list) -> int:
+    height = len(board)-1
+    width = len(board[0])
+    print(height,width)
     # Find highest block in each column
-    highest_blocks = [-1 for _ in len(board[0])]
-    for col in range(len((board[0]))):
-        for row in range(len(board)):
-            if (highest_blocks[col] == -1): continue
-
-        
-    
-        
-        
-            
-    pass
+    highest_blocks = [0 for _ in range(width)]
+    for y in range(width):
+        if (highest_blocks[y] > 0): break
+        for x in range(height):
+            if (board[x][y] > 0):
+                print("Found a block at",x,y,"=",0 + (height-x-1))
+                highest_blocks[y] = 0 + (height-x)
+                break
+    return sum(highest_blocks)
 
 def test(app=TetrisApp):
     while not app.gameover:
@@ -94,13 +95,33 @@ def test(app=TetrisApp):
     
 
 if __name__ == '__main__':
-    App = TetrisApp()
-    t1 = threading.Thread(target=App.run)
-    t2 = threading.Thread(target=test, args=(App,))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
+    app = TetrisApp()
+    # t1 = threading.Thread(target=app.run)
+    # t2 = threading.Thread(target=test, args=(app,))
+    # t1.start()
+    # t2.start()
+    # t1.join()
+    # t2.join()
+    key_actions = {
+        'ESCAPE':   app.quit,
+        'LEFT':     lambda:app.move(-1),
+        'RIGHT':    lambda:app.move(+1),
+        'DOWN':     lambda:app.drop(True),
+        'UP':       app.rotate_stone,
+        'p':        app.toggle_pause,
+        'SPACE':    app.start_game,
+        'RETURN':   app.insta_drop
+    }
+
+    app.gameover = False
+    app.paused = False
+    app.init_game()
+    app.new_stone()
+    app.insta_drop()
+    for i in range(len(app.board)):
+        print(app.board[i],"-",i)
+    print([i for i in range(len(app.board[0]))])
+    print(heuristic(app.board))
     print("Done!")
         
 # def astar_search(init_state, goal_state, move_cost):

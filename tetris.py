@@ -43,7 +43,7 @@ import pygame, sys
 # The configuration
 cell_size = 40
 cols =      10
-rows =      22
+rows =      20
 maxfps =    60
 
 colors = [
@@ -130,8 +130,7 @@ class TetrisApp(object):
                                                      # mouse movement
                                                      # events, so we
                                                      # block them.
-        # self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
-        self.next_stone = tetris_shapes[1]
+        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
         self.init_game()
 
     def new_stone(self):
