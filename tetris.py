@@ -130,7 +130,8 @@ class TetrisApp(object):
                                                      # mouse movement
                                                      # events, so we
                                                      # block them.
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        # self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_stone = tetris_shapes[1]
         self.init_game()
 
     def new_stone(self):

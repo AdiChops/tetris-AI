@@ -3,6 +3,13 @@ import threading
 import pygame
 import time
 from tetris import TetrisApp
+import os
+
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt','dos'):
+        command = 'cls'
+    os.system(command)
 
 # tetris_shapes = [
 #     [[1, 1, 1],
@@ -25,21 +32,62 @@ from tetris import TetrisApp
 #     [[7, 7],
 #      [7, 7]]
 # ]
-def possible_board_states(app):
+def possible_board_states(app=TetrisApp):
     app.board # we can access the current board like this
-    app.stone # we can access the next stone like this
+    app.stone # we can access the currently dropping stone like this
+    states = []
+    current_x = app.stone_x
+    while current_x-1 >= 0:
+        current_x -= 1
+        print(current_x)
+        copy = TetrisApp()
+        copy.stone = app.stone
+        copy.board = app.board
+        copy.stone_x = current_x
+        states.append(project(copy))
+    print(states)
+
+
+
     # we'll have to look at the current height
     # from the current height, we can determine where the piece would fall
     # from there, we can determine all the possible places in which the piece could fall and append it to the list of possible states
 
+def sample_board_replace(board):
+    board[len(board)//2][len(board[0])//2] = 0
+    return board
+
+
+# 
+def project(app=TetrisApp):
+    app.insta_drop()
+    return app.board
+
+# Heuristic used for A* search
+def heuristic(board: list) -> int:
+    # Find highest block in each column
+    highest_blocks = [-1 for _ in len(board[0])]
+    for col in range(len((board[0]))):
+        for row in range(len(board)):
+            if (highest_blocks[col] == -1): continue
+
+        
+    
+        
+        
+            
+    pass
 
 def test(app=TetrisApp):
     while not app.gameover:
-        app.insta_drop()
+        # app.rotate_stone()
+        # pygame.event.post(pygame.event.Event(pygame.QUIT))
+        possible_board_states(app)
         time.sleep(0.5)
-        for i in app.board:
-            print(i)
-        print('\n')
+
+        # for i in app.board:
+        #     print(i)
+        # print('\n')
     print("Game is over!")
     time.sleep(1) # sleep for 1 second to process what happened and then quit
     pygame.event.post(pygame.event.Event(pygame.QUIT))
@@ -55,7 +103,6 @@ if __name__ == '__main__':
     t2.join()
     print("Done!")
         
-
 # def astar_search(init_state, goal_state, move_cost):
 #     costs = dict({'u': move_cost[0], 'd': move_cost[1], 'l': move_cost[2], 'r': move_cost[3]})
 #     init_arr = numpy.reshape(init_state, (-1,BOARD_SIZE), 'F')
