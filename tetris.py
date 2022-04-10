@@ -37,10 +37,8 @@
 # THE SOFTWARE.
 
 from random import randrange as rand
-import threading
 import pygame, sys
 # import AI
-import time
 
 # The configuration
 cell_size = 40
@@ -266,17 +264,6 @@ class TetrisApp(object):
             self.init_game()
             self.gameover = False
 
-    def AI(self):
-        while not self.gameover:
-            self.insta_drop()
-            time.sleep(0.5)
-            for i in self.board:
-                print(i)
-            print('\n')
-        print("Game is over!")
-        time.sleep(1) # sleep for 1 second to process what happened and then quit
-        pygame.event.post(pygame.event.Event(pygame.QUIT))
-
     def run(self):
         key_actions = {
             'ESCAPE':   self.quit,
@@ -293,9 +280,6 @@ class TetrisApp(object):
         self.paused = False
 
         dont_burn_my_cpu = pygame.time.Clock()
-        # Start thread for AI
-        t1 = threading.Thread(target=self.test)
-        t1.start()
         while 1:
             self.screen.fill((0,0,0))
             if self.gameover:
@@ -333,11 +317,9 @@ Press space to continue""" % self.score)
                         if event.key == eval("pygame.K_"
                         +key):
                             key_actions[key]()
-            dont_burn_my_cpu.tick(maxfps)
-        t1.join()
 
+            dont_burn_my_cpu.tick(maxfps)
 
 if __name__ == '__main__':
     App = TetrisApp()
     App.run()
-
