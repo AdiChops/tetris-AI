@@ -37,13 +37,16 @@
 # THE SOFTWARE.
 
 from random import randrange as rand
+import threading
 import pygame, sys
+# import AI
+import time
 
 # The configuration
-cell_size = 18
+cell_size = 40
 cols =      10
 rows =      22
-maxfps =    30
+maxfps =    60
 
 colors = [
 (0,   0,   0  ),
@@ -109,10 +112,7 @@ def join_matrixes(mat1, mat2, mat2_off):
     return mat1
 
 def new_board():
-    board = [
-        [ 0 for x in range(cols) ]
-        for y in range(rows)
-    ]
+    board = [[ 0 for x in range(cols) ] for y in range(rows)]
     board += [[ 1 for x in range(cols)]]
     return board
 
@@ -125,8 +125,7 @@ class TetrisApp(object):
         self.rlim = cell_size*cols
         self.bground_grid = [[ 8 if x%2==y%2 else 0 for x in range(cols)] for y in range(rows)]
 
-        self.default_font =  pygame.font.Font(
-            pygame.font.get_default_font(), 12)
+        self.default_font =  pygame.font.Font(pygame.font.match_font("calibri"), 18)
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.event.set_blocked(pygame.MOUSEMOTION) # We do not need
@@ -142,9 +141,7 @@ class TetrisApp(object):
         self.stone_x = int(cols / 2 - len(self.stone[0])/2)
         self.stone_y = 0
 
-        if check_collision(self.board,
-                           self.stone,
-                           (self.stone_x, self.stone_y)):
+        if check_collision(self.board, self.stone,(self.stone_x, self.stone_y)):
             self.gameover = True
 
     def init_game(self):
@@ -269,6 +266,17 @@ class TetrisApp(object):
             self.init_game()
             self.gameover = False
 
+    def AI(self):
+        while not self.gameover:
+            self.insta_drop()
+            time.sleep(0.5)
+            for i in self.board:
+                print(i)
+            print('\n')
+        print("Game is over!")
+        time.sleep(1) # sleep for 1 second to process what happened and then quit
+        pygame.event.post(pygame.event.Event(pygame.QUIT))
+
     def run(self):
         key_actions = {
             'ESCAPE':   self.quit,
@@ -285,6 +293,9 @@ class TetrisApp(object):
         self.paused = False
 
         dont_burn_my_cpu = pygame.time.Clock()
+        # Start thread for AI
+        t1 = threading.Thread(target=self.test)
+        t1.start()
         while 1:
             self.screen.fill((0,0,0))
             if self.gameover:
@@ -301,8 +312,8 @@ Press space to continue""" % self.score)
                     self.disp_msg("Next:", (
                         self.rlim+cell_size,
                         2))
-                    self.disp_msg("Score: %d\n\nLevel: %d\
-\nLines: %d" % (self.score, self.level, self.lines),
+                    self.disp_msg("Score: %d\n\n\nLevel: %d\
+\n\nLines: %d" % (self.score, self.level, self.lines),
                         (self.rlim+cell_size, cell_size*5))
                     self.draw_matrix(self.bground_grid, (0,0))
                     self.draw_matrix(self.board, (0,0))
@@ -322,8 +333,11 @@ Press space to continue""" % self.score)
                         if event.key == eval("pygame.K_"
                         +key):
                             key_actions[key]()
-
             dont_burn_my_cpu.tick(maxfps)
+        t1.join()
+
+
 if __name__ == '__main__':
     App = TetrisApp()
     App.run()
+
