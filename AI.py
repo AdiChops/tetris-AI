@@ -38,7 +38,8 @@ def possible_board_states(app=tetris.TetrisApp):
     stone = [row[:] for row in app.stone]
     for r in range(0, rotations[app.stone_letter]):
         for i in range(0,len(app.board[0]) - len(stone)):
-            states.append({'num_rotations': r, 'board':drop([row[:] for row in app.board],  stone, i, app.stone_y//1), 'stone_x':i})
+            temp_board = drop([row[:] for row in app.board],  stone, i, app.stone_y//1)
+            states.append({'num_rotations': r, 'board':temp_board[:], 'stone_x':i, 'heuristic':holes_heuristic(temp_board[:])})
         stone = tetris.rotate_clockwise(stone)
     print("\n")
     print("Printing States Now")
@@ -46,7 +47,7 @@ def possible_board_states(app=tetris.TetrisApp):
         for i in range(len(b['board'])-1):
             print(['\u25a1' if n>0 else " " for n in b['board'][i]],"-",i)
         print("\n")
-
+    return states
 
     # we'll have to look at the current height
     # from the current height, we can determine where the piece would fall
@@ -128,6 +129,14 @@ def test(app=tetris.TetrisApp):
     pygame.event.post(pygame.event.Event(pygame.QUIT))
     
 
+def best_fs(states):
+    min_state = states[0]
+    for state in states:
+        if state['heuristic'] < min_state['heuristic']:
+            min_state = dict(state)
+    return min_state
+
+
 if __name__ == '__main__':
     app = tetris.TetrisApp()
     # t1 = threading.Thread(target=app.run)
@@ -141,9 +150,15 @@ if __name__ == '__main__':
     app.init_game()
     for i in range(2):
         app.new_stone()
+        state = best_fs(possible_board_states(app))
+        for n in range(0, state['num_rotations']):
+            app.rotate_stone()
+        while state['stone_x'] < app.stone_x:
+            app.move(-1)
+        while state['stone_x'] > app.stone_x:
+            app.move(+1)
         app.insta_drop()
     app.print_board()
-    possible_board_states(app)
     print("Actual board")
     app.print_board()
     print([str(i) for i in range(len(app.board[0]))])
@@ -170,3 +185,29 @@ if __name__ == '__main__':
 #         min_cost_index = min_cost_finder(frontiers)
 
 #     return frontiers[min_cost_index]["path"] # total cost can easily be found by also returning/printing frontiers[min_cost_index]["g(n)"]
+
+# lunar_monkeys — Today at 12:23 AM
+# # A* search algorithm
+# def astar_search(init_state: list, goal_state: list, move_cost: list) -> str:
+#     cost = {'u':move_cost[0], 'd':move_cost[1], 'l':move_cost[2],'r':move_cost[3]}
+#     frontier = [] # Priority queue with tuples as (priority, object)
+#     heappush(frontier,(heuristic(init_state, goal_state), Node(init_state,parent=None,move_made="",total_cost=0)))
+#     while len(frontier)!=0:
+#         node = heappop(frontier)[1]
+#         if (node.state == goal_state):
+#             optimal_path = ""
+#             path_cost = node.cost
+#             while(node.parent != None):
+#                 optimal_path = optimal_path+node.move
+#                 node = node.parent
+#             optimal_path = optimal_path[::-1]
+#             # print(init_state,"=>",goal_state,"=",optimal_path,"(cost:",path_cost,")")
+#             return optimal_path
+#         for (move,state) in move_puzzle(node.state):
+#             hcost = heuristic(state,goal_state)
+#             true_cost = node.cost + cost[move]
+#             if (move == 'u'): heappush(frontier,(true_cost+hcost, Node(state,node,move,true_cost)))
+#             elif (move == 'd'): heappush(frontier,(true_cost+hcost, Node(state,node,move,true_cost)))
+#             elif (move == 'l'): heappush(frontier,(true_cost+hcost, Node(state,node,move,true_cost)))
+#             elif (move == 'r'): heappush(frontier,(true_cost+hcost, Node(state,node,move,true_cost)))
+#     return None
