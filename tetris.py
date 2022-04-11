@@ -38,6 +38,7 @@
 
 from random import choice
 import pygame, sys
+from itertools import permutations
 # import AI
 
 # The configuration
@@ -81,6 +82,7 @@ tetris_shapes = {'T':
     'O':[[7, 7],
         [7, 7]]
 }
+perms = list(permutations('TSZJLIO', 7))
 
 def rotate_clockwise(shape):
     return [
@@ -107,6 +109,10 @@ def join_matrixes(mat1, mat2, mat2_off):
     off_x, off_y = mat2_off
     for cy, row in enumerate(mat2):
         for cx, val in enumerate(row):
+            # print('cy',cy+off_y-1)
+            # print('cx',cx+off_x)
+            # print('mat=', len(mat1))
+            # print('mat[0]=',len(mat1[0]))
             mat1[cy+off_y-1 ][cx+off_x] += val
     return mat1
 
@@ -128,14 +134,17 @@ class TetrisApp(object):
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.event.set_blocked(pygame.MOUSEMOTION)
-        self.next_letter = choice(list(tetris_shapes.keys()))
+        self.stack = [i for i in choice(perms)]
+        self.next_letter = self.stack.pop()
         self.next_stone = tetris_shapes[self.next_letter]
         self.init_game()
 
     def new_stone(self):
+        if len(self.stack) == 0:
+            self.stack = [i for i in choice(perms)]
         self.stone_letter = self.next_letter
         self.stone = self.next_stone[:]
-        self.next_letter = choice(list(tetris_shapes.keys()))
+        self.next_letter = self.stack.pop()
         self.next_stone = tetris_shapes[self.next_letter]
         self.stone_x = int(cols / 2 - len(self.stone[0])/2)
         self.stone_y = 0

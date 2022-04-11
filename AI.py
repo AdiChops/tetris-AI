@@ -37,16 +37,12 @@ def possible_board_states(app=tetris.TetrisApp):
     states = []
     stone = [row[:] for row in app.stone]
     for r in range(0, rotations[app.stone_letter]):
-        for i in range(0,len(app.board[0]) - len(stone)):
+        for i in range(0,(len(app.board[0]) - len(stone[0])+1)):
             temp_board = drop([row[:] for row in app.board],  stone, i, app.stone_y//1)
             states.append({'num_rotations': r, 'board':temp_board[:], 'stone_x':i, 'heuristic':holes_heuristic(temp_board[:])})
         stone = tetris.rotate_clockwise(stone)
-    print("\n")
-    print("Printing States Now")
-    for b in states:
-        for i in range(len(b['board'])-1):
-            print(['\u25a1' if n>0 else " " for n in b['board'][i]],"-",i)
-        print("\n")
+    # print("\n")
+    # print("Printing States Now")
     return states
 
     # we'll have to look at the current height
@@ -69,14 +65,14 @@ def drop(board, stone, stone_x, stone_y):
 def height_heuristic(board: list) -> int:
     height = len(board)-1
     width = len(board[0])
-    print(height,width)
+    # print(height,width)
     # Find highest block in each column
     highest_blocks = [0 for _ in range(width)]
     for x in range(width):
-        if (highest_blocks[x] > 0): break
+        if (highest_blocks[x] > 0): continue
         for y in range(height):
             if (board[y][x] > 0):
-                print("Found a block at",y,x,"=",0 + (height-y-1))
+                # print("Found a block at",y,x,"=",0 + (height-y-1))
                 highest_blocks[x] = 0 + (height-y)
                 break
     return sum(highest_blocks)
@@ -97,38 +93,23 @@ def holes_heuristic(board: list) -> int:
                 for i in range(y+1,height):
                     if(board[i][x] == 0): 
                         # print("Cell",(x,i),"is under peak",(x,top_blocks[x]),"+"+str(height-i))
-                        total += height-i
+                        total += (height-i)**3
                 # Cell to the left of a peak is also a hole
                 if(0 <= x-1 and board[y][x-1] == 0):
                     # print("Cell",(x-1,y),"is just left of peak",(x,top_blocks[x]),"+1")
-                    total += 1
+                    total += (height-y)**2
                 continue
             # Check if cell is surrounded by a 'tower'
             if(0 <= x-1):
                 if(top_blocks[x-1] <= y and board[y][x] == 0): 
                     # print("Cell",(x,y),"is to the right of peak",(x-1,top_blocks[x-1]),"+1")
-                    total += 1
+                    total += (height-y)**2
             if(x+1 < width):
                 if(top_blocks[x+1] <= y and board[y][x] == 0): 
                     # print("Cell",(x,y),"is to the left of peak",(x+1,top_blocks[x+1]),"+1")
-                    total += 1
+                    total += (height-y)**2
     return total
-
-def test(app=tetris.TetrisApp):
-    while not app.gameover:
-        # app.rotate_stone()
-        # pygame.event.post(pygame.event.Event(pygame.QUIT))
-        possible_board_states(app)
-        time.sleep(0.5)
-
-        # for i in app.board:
-        #     print(i)
-        # print('\n')
-    print("Game is over!")
-    time.sleep(1) # sleep for 1 second to process what happened and then quit
-    pygame.event.post(pygame.event.Event(pygame.QUIT))
     
-
 def best_fs(states):
     min_state = states[0]
     for state in states:
@@ -136,20 +117,8 @@ def best_fs(states):
             min_state = dict(state)
     return min_state
 
-
-if __name__ == '__main__':
-    app = tetris.TetrisApp()
-    # t1 = threading.Thread(target=app.run)
-    # t2 = threading.Thread(target=test, args=(app,))
-    # t1.start()
-    # t2.start()
-    # t1.join()
-    # t2.join()
-    app.gameover = False
-    app.paused = False
-    app.init_game()
-    for i in range(2):
-        app.new_stone()
+def AI(app = tetris.TetrisApp):
+    while not app.gameover:
         state = best_fs(possible_board_states(app))
         for n in range(0, state['num_rotations']):
             app.rotate_stone()
@@ -158,11 +127,37 @@ if __name__ == '__main__':
         while state['stone_x'] > app.stone_x:
             app.move(+1)
         app.insta_drop()
-    app.print_board()
-    print("Actual board")
-    app.print_board()
-    print([str(i) for i in range(len(app.board[0]))])
-    print(holes_heuristic(app.board))    
+        # time.sleep(0.1) # you can comment this out for some pure chaos 😈
+    print(app.level)
+    print(app.score)
+    pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+if __name__ == '__main__':
+    app = tetris.TetrisApp()
+    t1 = threading.Thread(target=app.run)
+    t2 = threading.Thread(target=AI, args=(app,))
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    # app.gameover = False
+    # app.paused = False
+    # app.init_game()
+    # for i in range(2):
+    #     app.new_stone()
+    #     state = best_fs(possible_board_states(app))
+    #     for n in range(0, state['num_rotations']):
+    #         app.rotate_stone()
+    #     while state['stone_x'] < app.stone_x:
+    #         app.move(-1)
+    #     while state['stone_x'] > app.stone_x:
+    #         app.move(+1)
+    #     app.insta_drop()
+    # app.print_board()
+    # print("Actual board")
+    # app.print_board()
+    # print([str(i) for i in range(len(app.board[0]))])
+    # print(holes_heuristic(app.board))    
     print("Done!")
         
 # def astar_search(init_state, goal_state, move_cost):
