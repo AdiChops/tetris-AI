@@ -150,6 +150,10 @@ class TetrisApp(object):
         self.lines = 0
         pygame.time.set_timer(pygame.USEREVENT+1, 1000)
 
+    def print_board(self):
+        for i in range(len(self.board)-1):
+            print(['\u25a1' if n>0 else " " for n in self.board[i]],"-",i)
+
     def disp_msg(self, msg, topleft):
         x,y = topleft
         for line in msg.splitlines():

@@ -2,14 +2,14 @@ import numpy
 import threading
 import pygame
 import time
-from tetris import TetrisApp
+import tetris
 import os
 
-# def clearConsole():
-#     command = 'clear'
-#     if os.name in ('nt','dos'):
-#         command = 'cls'
-#     os.system(command)
+def clearConsole():
+    command = 'clear'
+    if os.name in ('nt','dos'):
+        command = 'cls'
+    os.system(command)
 
 # tetris_shapes = [
 #     [[1, 1, 1],
@@ -32,7 +32,7 @@ import os
 #     [[7, 7],
 #      [7, 7]]
 # ]
-def possible_board_states(app=TetrisApp):
+def possible_board_states(app=tetris.TetrisApp):
     app.board # we can access the current board like this
     app.stone # we can access the currently dropping stone like this
     states = []
@@ -40,7 +40,7 @@ def possible_board_states(app=TetrisApp):
     while current_x-1 >= 0:
         current_x -= 1
         print(current_x)
-        copy = TetrisApp()
+        copy = tetris.TetrisApp()
         copy.stone = app.stone
         copy.board = app.board
         copy.stone_x = current_x
@@ -59,12 +59,12 @@ def sample_board_replace(board):
 
 
 # 
-def project(app=TetrisApp):
+def project(app=tetris.TetrisApp):
     app.insta_drop()
     return app.board
 
-# Heuristic used for A* search
-def heuristic(board: list) -> int:
+# Heuristic used for A* search, 
+def heuristic1(board: list) -> int:
     height = len(board)-1
     width = len(board[0])
     print(height,width)
@@ -79,7 +79,40 @@ def heuristic(board: list) -> int:
                 break
     return sum(highest_blocks)
 
-def test(app=TetrisApp):
+# Heuristic 2.0
+def heuristic2(board: list) -> int:
+    # Top-left of board is (0,0)
+    height = len(board)-1
+    width = len(board[0])
+    total = 0
+    top_blocks = [height for _ in range(width)]
+    for y in range(height):
+        for x in range(width):
+            # Find highest block of the column
+            if(board[y][x] > 0 and top_blocks[x] > y):
+                top_blocks[x] = y
+                # Check for holes under highest block
+                for i in range(y+1,height):
+                    if(board[i][x] == 0): 
+                        # print("Cell",(x,i),"is under peak",(x,top_blocks[x]),"+"+str(height-i))
+                        total += height-i
+                # Cell to the left of a peak is also a hole
+                if(0 <= x-1 and board[y][x-1] == 0):
+                    # print("Cell",(x-1,y),"is just left of peak",(x,top_blocks[x]),"+1")
+                    total += 1
+                continue
+            # Check if cell is surrounded by a 'tower'
+            if(0 <= x-1):
+                if(top_blocks[x-1] <= y and board[y][x] == 0): 
+                    # print("Cell",(x,y),"is to the right of peak",(x-1,top_blocks[x-1]),"+1")
+                    total += 1
+            if(x+1 < width):
+                if(top_blocks[x+1] <= y and board[y][x] == 0): 
+                    # print("Cell",(x,y),"is to the left of peak",(x+1,top_blocks[x+1]),"+1")
+                    total += 1
+    return total
+
+def test(app=tetris.TetrisApp):
     while not app.gameover:
         # app.rotate_stone()
         # pygame.event.post(pygame.event.Event(pygame.QUIT))
@@ -95,33 +128,22 @@ def test(app=TetrisApp):
     
 
 if __name__ == '__main__':
-    app = TetrisApp()
+    app = tetris.TetrisApp()
     # t1 = threading.Thread(target=app.run)
     # t2 = threading.Thread(target=test, args=(app,))
     # t1.start()
     # t2.start()
     # t1.join()
     # t2.join()
-    key_actions = {
-        'ESCAPE':   app.quit,
-        'LEFT':     lambda:app.move(-1),
-        'RIGHT':    lambda:app.move(+1),
-        'DOWN':     lambda:app.drop(True),
-        'UP':       app.rotate_stone,
-        'p':        app.toggle_pause,
-        'SPACE':    app.start_game,
-        'RETURN':   app.insta_drop
-    }
-
     app.gameover = False
     app.paused = False
     app.init_game()
-    app.new_stone()
-    app.insta_drop()
-    for i in range(len(app.board)):
-        print(app.board[i],"-",i)
-    print([i for i in range(len(app.board[0]))])
-    print(heuristic(app.board))
+    for i in range(2):
+        app.new_stone()
+        app.insta_drop()
+    app.print_board()
+    print([str(i) for i in range(len(app.board[0]))])
+    print(heuristic2(app.board))    
     print("Done!")
         
 # def astar_search(init_state, goal_state, move_cost):
