@@ -36,7 +36,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from random import randrange as rand
+from random import choice
 import pygame, sys
 # import AI
 
@@ -47,39 +47,40 @@ rows =      20
 maxfps =    60
 
 colors = [
-(0,   0,   0  ),
-(255, 85,  85),
-(100, 200, 115),
-(120, 108, 245),
-(255, 140, 50 ),
-(50,  120, 52 ),
-(146, 202, 73 ),
-(150, 161, 218 ),
-(35,  35,  35) # Helper color for background grid
+    (0, 0, 0),
+    (160, 0, 235),
+    (40, 175, 65),
+    (240, 35, 45),
+    (40, 0, 230),
+    (240, 151, 40),
+    (35, 190, 235),
+    (245, 210, 50),
+    (35, 35, 35) # Helper color for background grid
 ]
 
 # Define the shapes of the single parts
-tetris_shapes = [
+
+tetris_shapes = {'T':
     [[1, 1, 1],
      [0, 1, 0]],
 
-    [[0, 2, 2],
-     [2, 2, 0]],
+    'S': [[0, 2, 2],
+        [2, 2, 0]],
 
-    [[3, 3, 0],
-     [0, 3, 3]],
+    'Z':[[3, 3, 0],
+        [0, 3, 3]],
 
-    [[4, 0, 0],
-     [4, 4, 4]],
+    'J':[[4, 0, 0],
+        [4, 4, 4]],
 
-    [[0, 0, 5],
-     [5, 5, 5]],
+    'L':[[0, 0, 5],
+        [5, 5, 5]],
 
-    [[6, 6, 6, 6]],
+    'I':[[6, 6, 6, 6]],
 
-    [[7, 7],
-     [7, 7]]
-]
+    'O':[[7, 7],
+        [7, 7]]
+}
 
 def rotate_clockwise(shape):
     return [
@@ -127,12 +128,15 @@ class TetrisApp(object):
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.event.set_blocked(pygame.MOUSEMOTION)
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_letter = choice(list(tetris_shapes.keys()))
+        self.next_stone = tetris_shapes[self.next_letter]
         self.init_game()
 
     def new_stone(self):
+        self.stone_letter = self.next_letter
         self.stone = self.next_stone[:]
-        self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
+        self.next_letter = choice(list(tetris_shapes.keys()))
+        self.next_stone = tetris_shapes[self.next_letter]
         self.stone_x = int(cols / 2 - len(self.stone[0])/2)
         self.stone_y = 0
 

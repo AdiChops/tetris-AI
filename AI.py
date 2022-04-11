@@ -32,27 +32,19 @@ def clearConsole():
 #     [[7, 7],
 #      [7, 7]]
 # ]
+rotations = {'T': 4, 'L':4, 'J':4, 'S': 2, 'Z': 2, 'I': 2, 'O': 1}
 def possible_board_states(app=tetris.TetrisApp):
-    app.board # we can access the current board like this
-    app.stone # we can access the currently dropping stone like this
     states = []
-    current_x = app.stone_x
-    while current_x-1 >= 0:
-        board = app.board[:]
-        current_x -= 1
-        print(current_x)
-        states.append(drop(board, app.stone, current_x, app.stone_y))
-    current_x = app.stone_x
-    while current_x+1 < len(board[0]) - len(app.stone):
-        board = app.board[:]
-        current_x += 1
-        print(current_x)
-        states.append(drop(board, app.stone, current_x, app.stone_y))
+    stone = [row[:] for row in app.stone]
+    for r in range(0, rotations[app.stone_letter]):
+        for i in range(0,len(app.board[0]) - len(stone)):
+            states.append({'num_rotations': r, 'board':drop([row[:] for row in app.board],  stone, i, app.stone_y//1), 'stone_x':i})
+        stone = tetris.rotate_clockwise(stone)
     print("\n")
     print("Printing States Now")
     for b in states:
-        for i in range(len(b)-1):
-            print(['\u25a1' if n>0 else " " for n in b[i]],"-",i)
+        for i in range(len(b['board'])-1):
+            print(['\u25a1' if n>0 else " " for n in b['board'][i]],"-",i)
         print("\n")
 
 
@@ -152,6 +144,8 @@ if __name__ == '__main__':
         app.insta_drop()
     app.print_board()
     possible_board_states(app)
+    print("Actual board")
+    app.print_board()
     print([str(i) for i in range(len(app.board[0]))])
     print(holes_heuristic(app.board))    
     print("Done!")
