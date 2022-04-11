@@ -38,30 +38,39 @@ def possible_board_states(app=tetris.TetrisApp):
     states = []
     current_x = app.stone_x
     while current_x-1 >= 0:
+        board = app.board[:]
         current_x -= 1
         print(current_x)
-        copy = tetris.TetrisApp()
-        copy.stone = app.stone
-        copy.board = app.board
-        copy.stone_x = current_x
-        states.append(project(copy))
-    print(states)
-
+        states.append(drop(board, app.stone, current_x, app.stone_y))
+    current_x = app.stone_x
+    while current_x+1 < len(board[0]) - len(app.stone):
+        board = app.board[:]
+        current_x += 1
+        print(current_x)
+        states.append(drop(board, app.stone, current_x, app.stone_y))
+    print("\n")
+    print("Printing States Now")
+    for b in states:
+        for i in range(len(b)-1):
+            print(['\u25a1' if n>0 else " " for n in b[i]],"-",i)
+        print("\n")
 
 
     # we'll have to look at the current height
     # from the current height, we can determine where the piece would fall
     # from there, we can determine all the possible places in which the piece could fall and append it to the list of possible states
 
-def sample_board_replace(board):
-    board[len(board)//2][len(board[0])//2] = 0
-    return board
-
-
 # 
-def project(app=tetris.TetrisApp):
-    app.insta_drop()
-    return app.board
+def drop(board, stone, stone_x, stone_y):
+    while not tetris.check_collision(board,
+                        stone,
+                        (stone_x, stone_y)):
+            stone_y += 1
+    return tetris.join_matrixes(
+        board,
+        stone,
+        (stone_x, stone_y))
+
 
 # Heuristic used for A* search, 
 def heuristic1(board: list) -> int:
@@ -142,6 +151,7 @@ if __name__ == '__main__':
         app.new_stone()
         app.insta_drop()
     app.print_board()
+    possible_board_states(app)
     print([str(i) for i in range(len(app.board[0]))])
     print(heuristic2(app.board))    
     print("Done!")
