@@ -72,24 +72,24 @@ def drop(board, stone, stone_x, stone_y):
         (stone_x, stone_y))
 
 
-# Heuristic used for A* search, 
-def heuristic1(board: list) -> int:
+# Heuristic on the 'height' of the grid
+def height_heuristic(board: list) -> int:
     height = len(board)-1
     width = len(board[0])
     print(height,width)
     # Find highest block in each column
     highest_blocks = [0 for _ in range(width)]
-    for y in range(width):
-        if (highest_blocks[y] > 0): break
-        for x in range(height):
-            if (board[x][y] > 0):
-                print("Found a block at",x,y,"=",0 + (height-x-1))
-                highest_blocks[y] = 0 + (height-x)
+    for x in range(width):
+        if (highest_blocks[x] > 0): break
+        for y in range(height):
+            if (board[y][x] > 0):
+                print("Found a block at",y,x,"=",0 + (height-y-1))
+                highest_blocks[x] = 0 + (height-y)
                 break
     return sum(highest_blocks)
 
-# Heuristic 2.0
-def heuristic2(board: list) -> int:
+# Heuristic based on the number of holes in the grid and their placement
+def holes_heuristic(board: list) -> int:
     # Top-left of board is (0,0)
     height = len(board)-1
     width = len(board[0])
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     app.print_board()
     possible_board_states(app)
     print([str(i) for i in range(len(app.board[0]))])
-    print(heuristic2(app.board))    
+    print(holes_heuristic(app.board))    
     print("Done!")
         
 # def astar_search(init_state, goal_state, move_cost):
