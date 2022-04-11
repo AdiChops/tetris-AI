@@ -126,10 +126,7 @@ class TetrisApp(object):
         self.default_font =  pygame.font.Font(pygame.font.match_font("calibri"), 18)
 
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.event.set_blocked(pygame.MOUSEMOTION) # We do not need
-                                                     # mouse movement
-                                                     # events, so we
-                                                     # block them.
+        pygame.event.set_blocked(pygame.MOUSEMOTION)
         self.next_stone = tetris_shapes[rand(len(tetris_shapes))]
         self.init_game()
 
@@ -188,12 +185,24 @@ class TetrisApp(object):
                         self.screen,
                         colors[val],
                         pygame.Rect(
-                            (off_x+x) *
-                              cell_size,
-                            (off_y+y) *
-                              cell_size,
+                            (off_x+x) * cell_size,
+                            (off_y+y) * cell_size,
                             cell_size,
-                            cell_size),0)
+                            cell_size
+                        ),
+                        0
+                    )
+                    pygame.draw.rect(
+                        self.screen,
+                        (0,0,0),
+                        pygame.Rect(
+                            (off_x+x) * cell_size,
+                            (off_y+y) * cell_size,
+                            cell_size,
+                            cell_size
+                        ),
+                        1
+                    )
 
     def add_cl_lines(self, n):
         linescores = [0, 40, 100, 300, 1200]
@@ -305,10 +314,8 @@ Press space to continue""" % self.score)
                         (self.rlim+cell_size, cell_size*5))
                     self.draw_matrix(self.bground_grid, (0,0))
                     self.draw_matrix(self.board, (0,0))
-                    self.draw_matrix(self.stone,
-                        (self.stone_x, self.stone_y))
-                    self.draw_matrix(self.next_stone,
-                        (cols+1,2))
+                    self.draw_matrix(self.stone, (self.stone_x, self.stone_y))
+                    self.draw_matrix(self.next_stone, (cols+1,2))
             pygame.display.update()
 
             for event in pygame.event.get():
@@ -318,8 +325,7 @@ Press space to continue""" % self.score)
                     self.quit()
                 elif event.type == pygame.KEYDOWN:
                     for key in key_actions:
-                        if event.key == eval("pygame.K_"
-                        +key):
+                        if event.key == eval("pygame.K_"+key):
                             key_actions[key]()
 
             dont_burn_my_cpu.tick(maxfps)
