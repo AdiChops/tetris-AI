@@ -45,7 +45,7 @@ from itertools import permutations
 cell_size = 40
 cols =      10
 rows =      20
-maxfps =    60
+maxfps =    30
 
 colors = [
     (0, 0, 0),
@@ -109,10 +109,6 @@ def join_matrixes(mat1, mat2, mat2_off):
     off_x, off_y = mat2_off
     for cy, row in enumerate(mat2):
         for cx, val in enumerate(row):
-            # print('cy',cy+off_y-1)
-            # print('cx',cx+off_x)
-            # print('mat=', len(mat1))
-            # print('mat[0]=',len(mat1[0]))
             mat1[cy+off_y-1 ][cx+off_x] += val
     return mat1
 

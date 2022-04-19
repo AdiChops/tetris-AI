@@ -10,34 +10,24 @@ def clearConsole():
         command = 'cls'
     os.system(command)
 
-# tetris_shapes = [
-#     [[1, 1, 1],
-#      [0, 1, 0]],
+def remove_row(board, row):
+    del board[row]
+    return [[0 for i in range(10)]] + board
 
-#     [[0, 2, 2],
-#      [2, 2, 0]],
-
-#     [[3, 3, 0],
-#      [0, 3, 3]],
-
-#     [[4, 0, 0],
-#      [4, 4, 4]],
-
-#     [[0, 0, 5],
-#      [5, 5, 5]],
-
-#     [[6, 6, 6, 6]],
-
-#     [[7, 7],
-#      [7, 7]]
-# ]
-rotations = {'T': 4, 'L':4, 'J':4, 'S': 2, 'Z': 2, 'I': 2, 'O': 1}
 def possible_board_states(app=tetris.TetrisApp):
+    rotations = {'T': 4, 'L':4, 'J':4, 'S': 2, 'Z': 2, 'I': 2, 'O': 1}
     states = []
     stone = [row[:] for row in app.stone]
     for r in range(0, rotations[app.stone_letter]):
         for i in range(0,(len(app.board[0]) - len(stone[0])+1)):
             temp_board = drop([row[:] for row in app.board],  stone, i, app.stone_y//1)
+            while True:
+                for i, row in enumerate(temp_board[:-1]):
+                    if 0 not in row:
+                        temp_board = remove_row(temp_board, i)
+                        break
+                else:
+                    break
             states.append({'num_rotations': r, 'board':temp_board[:], 'stone_x':i, 'heuristic':holes_heuristic(temp_board[:])})
         stone = tetris.rotate_clockwise(stone)
     # print("\n")
