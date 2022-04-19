@@ -2,6 +2,7 @@ import threading
 import pygame
 import time
 import tetris
+import logic
 import os
 
 def clearConsole():
@@ -34,12 +35,12 @@ def clearConsole():
 rotations = {'T': 4, 'L':4, 'J':4, 'S': 2, 'Z': 2, 'I': 2, 'O': 1}
 def possible_board_states(app=tetris.TetrisApp):
     states = []
-    stone = [row[:] for row in app.stone]
-    for r in range(0, rotations[app.stone_letter]):
-        for i in range(0,(len(app.board[0]) - len(stone[0])+1)):
-            temp_board = drop([row[:] for row in app.board],  stone, i, app.stone_y//1)
+    stone = [row[:] for row in app.game.stone]
+    for r in range(0, rotations[app.game.stone_letter]):
+        for i in range(0,(len(app.game.board[0]) - len(stone[0])+1)):
+            temp_board = drop([row[:] for row in app.game.board],  stone, i, app.game.stone_y//1)
             states.append({'num_rotations': r, 'board':temp_board[:], 'stone_x':i, 'heuristic':holes_heuristic(temp_board[:])})
-        stone = tetris.rotate_clockwise(stone)
+        stone = logic.rotate_clockwise(stone)
     # print("\n")
     # print("Printing States Now")
     return states
@@ -50,11 +51,11 @@ def possible_board_states(app=tetris.TetrisApp):
 
 # 
 def drop(board, stone, stone_x, stone_y):
-    while not tetris.check_collision(board,
+    while not logic.check_collision(board,
                         stone,
                         (stone_x, stone_y)):
             stone_y += 1
-    return tetris.join_matrixes(
+    return logic.join_matrixes(
         board,
         stone,
         (stone_x, stone_y))
@@ -117,18 +118,18 @@ def best_fs(states):
     return min_state
 
 def AI(app = tetris.TetrisApp):
-    while not app.gameover:
+    while not app.game.gameover:
         state = best_fs(possible_board_states(app))
         for n in range(0, state['num_rotations']):
-            app.rotate_stone()
-        while state['stone_x'] < app.stone_x:
-            app.move(-1)
-        while state['stone_x'] > app.stone_x:
-            app.move(+1)
-        app.insta_drop()
+            app.game.rotate_stone()
+        while state['stone_x'] < app.game.stone_x:
+            app.game.move(-1)
+        while state['stone_x'] > app.game.stone_x:
+            app.game.move(+1)
+        app.game.insta_drop()
         # time.sleep(0.1) # you can comment this out for some pure chaos 😈
-    print(app.level)
-    print(app.score)
+    print(app.game.level)
+    print(app.game.score)
     pygame.event.post(pygame.event.Event(pygame.QUIT))
 
 if __name__ == '__main__':
